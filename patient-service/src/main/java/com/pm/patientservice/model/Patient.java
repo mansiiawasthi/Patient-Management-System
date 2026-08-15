@@ -9,6 +9,7 @@ import java.util.UUID;
 
 @Entity
 public class Patient {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
@@ -30,6 +31,7 @@ public class Patient {
     @NotNull
     private LocalDate registeredDate;
 
+
     public UUID getId() {
         return id;
     }
@@ -37,6 +39,7 @@ public class Patient {
     public void setId(UUID id) {
         this.id = id;
     }
+
 
     public String getName() {
         return name;
@@ -46,6 +49,7 @@ public class Patient {
         this.name = name;
     }
 
+
     public String getEmail() {
         return email;
     }
@@ -53,6 +57,7 @@ public class Patient {
     public void setEmail(String email) {
         this.email = email;
     }
+
 
     public String getAddress() {
         return address;
@@ -62,6 +67,7 @@ public class Patient {
         this.address = address;
     }
 
+
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
@@ -70,6 +76,7 @@ public class Patient {
         this.dateOfBirth = dateOfBirth;
     }
 
+
     public LocalDate getRegisteredDate() {
         return registeredDate;
     }
@@ -77,6 +84,4 @@ public class Patient {
     public void setRegisteredDate(LocalDate registeredDate) {
         this.registeredDate = registeredDate;
     }
-
-
 }
