@@ -56,10 +56,11 @@ public class PatientService {
          * Check whether the email already belongs to another patient.
          */
 
-        if (patientRepository.existsByEmailAndIdNot(patientRequestDTO.getEmail(),id)) {
-            throw new EmailAlreadyExistsException
-                    ("A patient with this email" + "already exists"
-                            + patientRequestDTO.getEmail());
+        if (patientRepository.existsByEmailAndIdNot(patientRequestDTO.getEmail(), id)) {
+            throw new EmailAlreadyExistsException(
+                    "A patient with this email already exists: "
+                            + patientRequestDTO.getEmail()
+            );
         }
 
         patient.setName(patientRequestDTO.getName());
