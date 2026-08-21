@@ -1,12 +1,12 @@
 package com.pm.patientservice.dto;
 
 public class PatientResponseDTO {
+
     private String id;
     private String name;
     private String email;
     private String address;
     private String dateOfBirth;
-
 
     public String getId() {
         return id;
@@ -47,6 +47,4 @@ public class PatientResponseDTO {
     public void setDateOfBirth(String dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
-
-
 }
