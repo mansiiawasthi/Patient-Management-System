@@ -1,0 +1,35 @@
+server:
+  port: 4004
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+
+            # CLIENT
+            # GET http://localhost:4004/api/patients
+            #
+            # GATEWAY removes /api
+            # ↓
+            # http://patient-service:4000/patients
+            - id: patient-service-route
+              uri: http://patient-service:4000
+              predicates:
+                - Path=/api/patients,/api/patients/**
+              filters:
+                - StripPrefix=1
+
+            # CLIENT
+            # GET http://localhost:4004/api-docs/patients
+            #
+            # GATEWAY
+            # ↓
+            # http://patient-service:4000/v3/api-docs
+            - id: api-docs-patient-route
+              uri: http://patient-service:4000
+              predicates:
+                - Path=/api-docs/patients,/api-docs/patients/**
+              filters:
+                - RewritePath=/api-docs/patients, /v3/api-docs
