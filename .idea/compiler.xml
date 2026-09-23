@@ -20,7 +20,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="analytics-service" options="-parameters" />
       <module name="api-gateway" options="-parameters" />
-      <module name="auth-service" options="-parameters" />
+      <module name="auth-service" options="-parameters --add-exports java.base/jdk.internal.classfile=ALL-UNNAMED" />
       <module name="billing-service" options="-parameters" />
       <module name="patient-service" options="-parameters" />
     </option>

@@ -8,12 +8,31 @@ spring:
         webflux:
           routes:
 
-            # CLIENT
+            # ==========================================
+            # AUTH SERVICE
+            # CLIENT:
+            # GET http://localhost:4004/auth/login
+            #
+            # GATEWAY:
+            # /auth/login -> /login
+            # http://auth-service:4005/login
+            # ==========================================
+            - id: auth-service-route
+              uri: http://auth-service:4005
+              predicates:
+                - Path=/auth/**
+              filters:
+                - StripPrefix=1
+
+            # ==========================================
+            # PATIENT SERVICE
+            # CLIENT:
             # GET http://localhost:4004/api/patients
             #
-            # GATEWAY removes /api
-            # ↓
+            # GATEWAY:
+            # /api/patients -> /patients
             # http://patient-service:4000/patients
+            # ==========================================
             - id: patient-service-route
               uri: http://patient-service:4000
               predicates:
@@ -21,15 +40,18 @@ spring:
               filters:
                 - StripPrefix=1
 
-            # CLIENT
+            # ==========================================
+            # PATIENT API DOCS
+            # CLIENT:
             # GET http://localhost:4004/api-docs/patients
             #
-            # GATEWAY
-            # ↓
+            # GATEWAY:
+            # /api-docs/patients -> /v3/api-docs
             # http://patient-service:4000/v3/api-docs
+            # ==========================================
             - id: api-docs-patient-route
               uri: http://patient-service:4000
               predicates:
-                - Path=/api-docs/patients,/api-docs/patients/**
+                - Path=/api-docs/patients
               filters:
-                - RewritePath=/api-docs/patients, /v3/api-docs
+                - RewritePath=/api-docs/patients,/v3/api-docs
