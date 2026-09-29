@@ -1,0 +1,69 @@
+services:
+
+  patient-service:
+    build:
+      context: ./patient-service
+    container_name: patient-service
+    ports:
+      - "4000:4000"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5000/db
+      SPRING_DATASOURCE_USERNAME: admin_viewer
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SQL_INIT_MODE: always
+      BILLING_SERVICE_ADDRESS: billing-service
+      BILLING_SERVICE_GRPC_PORT: 9001
+    networks:
+      - pm-net
+
+  billing-service:
+    build:
+      context: ./billing-service
+    container_name: billing-service
+    ports:
+      - "8080:8080"
+      - "9001:9001"
+    networks:
+      - pm-net
+
+  auth-service:
+    build:
+      context: ./auth-service
+    container_name: auth-service
+    ports:
+      - "4005:4005"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5001/db
+      SPRING_DATASOURCE_USERNAME: admin_viewer
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SQL_INIT_MODE: always
+      JWT_SECRET: E/fARTw3k5iW0ntBtxC2d78hFOytpzg6T8t9mf/Qghw=
+    networks:
+      - pm-net
+
+  analytics-service:
+    build:
+      context: ./analytics-service
+    container_name: analytics-service
+    ports:
+      - "4002:8080"
+    networks:
+      - pm-net
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "4004:4004"
+    depends_on:
+      - patient-service
+      - auth-service
+    networks:
+      - pm-net
+
+networks:
+  pm-net:
+    external: true
