@@ -1,4 +1,4 @@
-### GLogin Request to retrieve a token
+### Login Request to retrieve a token - API GATEWAY
 POST http://localhost:4004/auth/login
 Content-Type: application/json
 
@@ -8,4 +8,9 @@ Content-Type: application/json
 }
 
 > {% client.global.set("token",response.body.token) %}
+
+
+Without Gateway
+
+POST http://localhost:4005/login
 
