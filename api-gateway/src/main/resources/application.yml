@@ -39,6 +39,7 @@ spring:
                 - Path=/api/patients,/api/patients/**
               filters:
                 - StripPrefix=1
+                - JwtValidation
 
             # ==========================================
             # PATIENT API DOCS
