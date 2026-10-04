@@ -11,8 +11,8 @@
     <groupId>com.pm</groupId>
     <artifactId>analytics-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>analytics-server</name>
-    <description>analytics-server</description>
+    <name>analytics-service</name>
+    <description>analytics-service</description>
     <url/>
     <licenses>
         <license/>
@@ -79,8 +79,10 @@
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>0.6.1</version>
                 <configuration>
+                    <!--suppress UnresolvedMavenProperty -->
                     <protocArtifact>com.google.protobuf:protoc:3.25.5:exe:${os.detected.classifier}</protocArtifact>
                     <pluginId>grpc-java</pluginId>
+                    <!--suppress UnresolvedMavenProperty -->
                     <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.68.1:exe:${os.detected.classifier}</pluginArtifact>
                 </configuration>
                 <executions>

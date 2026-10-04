@@ -10,3 +10,6 @@ Content-Type: application/json
 }
 
 ###
+
+-API GATEWAY
+http://localhost:4004/api/patients/{{patientId}}

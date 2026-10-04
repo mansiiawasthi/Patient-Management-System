@@ -1,0 +1,65 @@
+server:
+  port: 4004
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+
+            # ==========================================
+            # AUTH SERVICE
+            # CLIENT:
+            # GET http://localhost:4004/auth/login
+            #
+            # GATEWAY:
+            # /auth/login -> /login
+            # http://auth-service:4005/login
+            # ==========================================
+            - id: auth-service-route
+              uri: http://host.docker.internal:4005
+              predicates:
+                - Path=/auth/**
+              filters:
+                - StripPrefix=1
+
+            # ==========================================
+            # PATIENT SERVICE
+            # CLIENT:
+            # GET http://localhost:4004/api/patients
+            #
+            # GATEWAY:
+            # /api/patients -> /patients
+            # http://patient-service:4000/patients
+            # ==========================================
+            - id: patient-service-route
+              uri: http://host.docker.internal:4000
+              predicates:
+                - Path=/api/patients,/api/patients/**
+              filters:
+                - StripPrefix=1
+                - JwtValidation
+
+            # ==========================================
+            # PATIENT API DOCS
+            # CLIENT:
+            # GET http://localhost:4004/api-docs/patients
+            #
+            # GATEWAY:
+            # /api-docs/patients -> /v3/api-docs
+            # http://patient-service:4000/v3/api-docs
+            # ==========================================
+            - id: api-docs-patient-route
+              uri: http://host.docker.internal:4000
+              predicates:
+                - Path=/api-docs/patients
+              filters:
+                - RewritePath=/api-docs/patients,/v3/api-docs
+
+            - id: api-docs-auth-route
+              uri: http://host.docker.internal:4005
+              predicates:
+                - Path=/api-docs/auth
+              filters:
+                - RewritePath=/api-docs/auth,/v3/api-docs
