@@ -22,7 +22,6 @@ import software.amazon.awscdk.services.ec2.InstanceSize;
 import software.amazon.awscdk.services.ec2.InstanceType;
 import software.amazon.awscdk.services.ec2.Vpc;
 import software.amazon.awscdk.services.ecs.AwsLogDriverProps;
-import software.amazon.awscdk.services.ecs.CloudMapNamespaceOptions;
 import software.amazon.awscdk.services.ecs.Cluster;
 import software.amazon.awscdk.services.ecs.ContainerDefinitionOptions;
 import software.amazon.awscdk.services.ecs.ContainerImage;
@@ -40,6 +39,7 @@ import software.amazon.awscdk.services.rds.DatabaseInstance;
 import software.amazon.awscdk.services.rds.DatabaseInstanceEngine;
 import software.amazon.awscdk.services.rds.PostgresEngineVersion;
 import software.amazon.awscdk.services.rds.PostgresInstanceEngineProps;
+import software.amazon.awscdk.services.elasticloadbalancingv2.HealthCheck;
 import software.amazon.awscdk.services.route53.CfnHealthCheck;
 
 public class LocalStack extends Stack {
@@ -98,7 +98,7 @@ public class LocalStack extends Stack {
                 List.of(4000),
                 patientServiceDb,
                 Map.of(
-                        "BILLING_SERVICE_ADDRESS", "host.docker.internal",
+                        "BILLING_SERVICE_ADDRESS", "billing-service",
                         "BILLING_SERVICE_GRPC_PORT", "9001"
                 ));
         patientService.getNode().addDependency(patientServiceDb);
@@ -165,9 +165,6 @@ public class LocalStack extends Stack {
     private Cluster createEcsCluster(){
         return Cluster.Builder.create(this, "PatientManagementCluster")
                 .vpc(vpc)
-                .defaultCloudMapNamespace(CloudMapNamespaceOptions.builder()
-                        .name("patient-management.local")
-                        .build())
                 .build();
     }
 
@@ -203,7 +200,7 @@ public class LocalStack extends Stack {
                                 .build()));
 
         Map<String, String> envVars = new HashMap<>();
-        envVars.put("SPRING_KAFKA_BOOTSTRAP_SERVERS", "localhost.localstack.cloud:4510, localhost.localstack.cloud:4511, localhost.localstack.cloud:4512");
+        envVars.put("SPRING_KAFKA_BOOTSTRAP_SERVERS", "pm-kafka:9092");
 
         if(additionalEnvVars != null){
             envVars.putAll(additionalEnvVars);
@@ -244,8 +241,7 @@ public class LocalStack extends Stack {
                 ContainerDefinitionOptions.builder()
                         .image(ContainerImage.fromRegistry("api-gateway:v2"))
                         .environment(Map.of(
-                                "SPRING_PROFILES_ACTIVE", "prod",
-                                "AUTH_SERVICE_URL", "http://host.docker.internal:4005"
+                                "AUTH_SERVICE_URL", "http://auth-service:4005"
                         ))
                         .portMappings(Stream.of(4004)
                                 .map(port -> PortMapping.builder()
@@ -264,7 +260,6 @@ public class LocalStack extends Stack {
                                 .build()))
                         .build();
 
-
         taskDefinition.addContainer("APIGatewayContainer", containerOptions);
 
         ApplicationLoadBalancedFargateService apiGateway =
@@ -275,6 +270,15 @@ public class LocalStack extends Stack {
                         .desiredCount(1)
                         .healthCheckGracePeriod(Duration.seconds(60))
                         .build();
+
+        // Fix: ALB default health check hits "/" which returns 404.
+        // Point it to the /health endpoint exposed by GatewayController.
+        apiGateway.getTargetGroup().configureHealthCheck(
+                HealthCheck.builder()
+                        .path("/health")
+                        .healthyHttpCodes("200")
+                        .build()
+        );
     }
 
     public static void main(final String[] args) {

@@ -977,34 +977,6 @@
                   "fqn": "aws-cdk-lib.aws_ecs.CfnCluster",
                   "version": "2.178.1"
                 }
-              },
-              "DefaultServiceDiscoveryNamespace": {
-                "id": "DefaultServiceDiscoveryNamespace",
-                "path": "localstack/PatientManagementCluster/DefaultServiceDiscoveryNamespace",
-                "children": {
-                  "Resource": {
-                    "id": "Resource",
-                    "path": "localstack/PatientManagementCluster/DefaultServiceDiscoveryNamespace/Resource",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::ServiceDiscovery::PrivateDnsNamespace",
-                      "aws:cdk:cloudformation:props": {
-                        "name": "patient-management.local",
-                        "vpc": {
-                          "Ref": "PatientManagementVPC522067E7"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_servicediscovery.CfnPrivateDnsNamespace",
-                      "version": "2.178.1"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_servicediscovery.PrivateDnsNamespace",
-                  "version": "2.178.1",
-                  "metadata": []
-                }
               }
             },
             "constructInfo": {
@@ -1144,7 +1116,7 @@
                           },
                           {
                             "name": "SPRING_KAFKA_BOOTSTRAP_SERVERS",
-                            "value": "localhost.localstack.cloud:4510, localhost.localstack.cloud:4511, localhost.localstack.cloud:4512"
+                            "value": "pm-kafka:9092"
                           }
                         ]
                       }
@@ -1494,7 +1466,7 @@
                         "environment": [
                           {
                             "name": "SPRING_KAFKA_BOOTSTRAP_SERVERS",
-                            "value": "localhost.localstack.cloud:4510, localhost.localstack.cloud:4511, localhost.localstack.cloud:4512"
+                            "value": "pm-kafka:9092"
                           }
                         ]
                       }
@@ -1839,7 +1811,7 @@
                         "environment": [
                           {
                             "name": "SPRING_KAFKA_BOOTSTRAP_SERVERS",
-                            "value": "localhost.localstack.cloud:4510, localhost.localstack.cloud:4511, localhost.localstack.cloud:4512"
+                            "value": "pm-kafka:9092"
                           }
                         ]
                       }
@@ -2233,11 +2205,11 @@
                           },
                           {
                             "name": "SPRING_KAFKA_BOOTSTRAP_SERVERS",
-                            "value": "localhost.localstack.cloud:4510, localhost.localstack.cloud:4511, localhost.localstack.cloud:4512"
+                            "value": "pm-kafka:9092"
                           },
                           {
                             "name": "BILLING_SERVICE_ADDRESS",
-                            "value": "host.docker.internal"
+                            "value": "billing-service"
                           }
                         ]
                       }
@@ -2581,12 +2553,8 @@
                         },
                         "environment": [
                           {
-                            "name": "SPRING_PROFILES_ACTIVE",
-                            "value": "prod"
-                          },
-                          {
                             "name": "AUTH_SERVICE_URL",
-                            "value": "http://host.docker.internal:4005"
+                            "value": "http://auth-service:4005"
                           }
                         ]
                       }
@@ -2902,6 +2870,10 @@
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::ElasticLoadBalancingV2::TargetGroup",
                               "aws:cdk:cloudformation:props": {
+                                "healthCheckPath": "/health",
+                                "matcher": {
+                                  "httpCode": "200"
+                                },
                                 "port": 80,
                                 "protocol": "HTTP",
                                 "targetGroupAttributes": [

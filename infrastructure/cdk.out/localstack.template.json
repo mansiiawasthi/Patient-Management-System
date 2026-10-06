@@ -562,15 +562,6 @@
   "PatientManagementCluster98E10F8D": {
    "Type": "AWS::ECS::Cluster"
   },
-  "PatientManagementClusterDefaultServiceDiscoveryNamespace72C5F264": {
-   "Type": "AWS::ServiceDiscovery::PrivateDnsNamespace",
-   "Properties": {
-    "Name": "patient-management.local",
-    "Vpc": {
-     "Ref": "PatientManagementVPC522067E7"
-    }
-   }
-  },
   "AuthServiceTaskTaskRoleE466B974": {
    "Type": "AWS::IAM::Role",
    "Properties": {
@@ -645,7 +636,7 @@
        },
        {
         "Name": "SPRING_KAFKA_BOOTSTRAP_SERVERS",
-        "Value": "localhost.localstack.cloud:4510, localhost.localstack.cloud:4511, localhost.localstack.cloud:4512"
+        "Value": "pm-kafka:9092"
        }
       ],
       "Essential": true,
@@ -847,7 +838,7 @@
       "Environment": [
        {
         "Name": "SPRING_KAFKA_BOOTSTRAP_SERVERS",
-        "Value": "localhost.localstack.cloud:4510, localhost.localstack.cloud:4511, localhost.localstack.cloud:4512"
+        "Value": "pm-kafka:9092"
        }
       ],
       "Essential": true,
@@ -1046,7 +1037,7 @@
       "Environment": [
        {
         "Name": "SPRING_KAFKA_BOOTSTRAP_SERVERS",
-        "Value": "localhost.localstack.cloud:4510, localhost.localstack.cloud:4511, localhost.localstack.cloud:4512"
+        "Value": "pm-kafka:9092"
        }
       ],
       "Essential": true,
@@ -1291,11 +1282,11 @@
        },
        {
         "Name": "SPRING_KAFKA_BOOTSTRAP_SERVERS",
-        "Value": "localhost.localstack.cloud:4510, localhost.localstack.cloud:4511, localhost.localstack.cloud:4512"
+        "Value": "pm-kafka:9092"
        },
        {
         "Name": "BILLING_SERVICE_ADDRESS",
-        "Value": "host.docker.internal"
+        "Value": "billing-service"
        }
       ],
       "Essential": true,
@@ -1502,12 +1493,8 @@
      {
       "Environment": [
        {
-        "Name": "SPRING_PROFILES_ACTIVE",
-        "Value": "prod"
-       },
-       {
         "Name": "AUTH_SERVICE_URL",
-        "Value": "http://host.docker.internal:4005"
+        "Value": "http://auth-service:4005"
        }
       ],
       "Essential": true,
@@ -1705,6 +1692,10 @@
   "APIGatewayServiceLBPublicListenerECSGroupF9D8CC70": {
    "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
    "Properties": {
+    "HealthCheckPath": "/health",
+    "Matcher": {
+     "HttpCode": "200"
+    },
     "Port": 80,
     "Protocol": "HTTP",
     "TargetGroupAttributes": [

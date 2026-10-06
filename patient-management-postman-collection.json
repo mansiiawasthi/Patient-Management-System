@@ -1,0 +1,315 @@
+{
+  "info": {
+    "_postman_id": "b3e04771-5b7f-4c12-9c9e-56e6b4d32f7a",
+    "name": "Patient Management System (ALB)",
+    "description": "Postman Collection for testing Patient Management System through AWS Floci Application Load Balancer (ALB).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://patient-management-APIG-f53ea9c7-8cad19afca09460e.elb.localhost.floci.io",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patientId",
+      "value": "123e4567-e89b-12d3-a456-426614174000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "health"
+          ]
+        },
+        "description": "Verifies ALB and API Gateway connectivity. Returns 'UP'."
+      },
+      "response": []
+    },
+    {
+      "name": "Auth Service",
+      "item": [
+        {
+          "name": "Login (Retrieve JWT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var data = pm.response.json();",
+                  "    if (data.token) {",
+                  "        pm.collectionVariables.set(\"token\", data.token);",
+                  "        console.log(\"Saved JWT Token to collection variable 'token'\");",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@test.com\",\n  \"password\": \"Password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Authenticates user and automatically sets the {{token}} variable."
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Token",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/validate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "validate"
+              ]
+            },
+            "description": "Validates the JWT token via Authorization: Bearer {{token}}. Returns 200 OK if valid, 401 Unauthorized otherwise."
+          },
+          "response": []
+        },
+        {
+          "name": "OpenAPI Docs (Auth Service)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-docs/auth",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api-docs",
+                "auth"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Patient Service",
+      "item": [
+        {
+          "name": "Get All Patients",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/patients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "patients"
+              ]
+            },
+            "description": "Fetches all patients. Protected by JWT filter in API Gateway."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var data = pm.response.json();",
+                  "    if (data.id) {",
+                  "        pm.collectionVariables.set(\"patientId\", data.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alex Morgan\",\n  \"email\": \"alex.morgan.test@example.com\",\n  \"address\": \"404 Healthcare Boulevard, Suite 10\",\n  \"dateOfBirth\": \"1998-11-20\",\n  \"registeredDate\": \"2026-10-06\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/patients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "patients"
+              ]
+            },
+            "description": "Creates a patient, triggers billing account via gRPC, and publishes a Kafka event."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Patient",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alex Morgan Updated\",\n  \"email\": \"alex.morgan.test@example.com\",\n  \"address\": \"500 Main Street, Suite 200\",\n  \"dateOfBirth\": \"1998-11-20\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/patients/{{patientId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "patients",
+                "{{patientId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Patient",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/patients/{{patientId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "patients",
+                "{{patientId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "OpenAPI Docs (Patient Service)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api-docs/patients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api-docs",
+                "patients"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

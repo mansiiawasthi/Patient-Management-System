@@ -18,7 +18,7 @@ spring:
             # http://auth-service:4005/login
             # ==========================================
             - id: auth-service-route
-              uri: http://host.docker.internal:4005
+              uri: http://auth-service:4005
               predicates:
                 - Path=/auth/**
               filters:
@@ -34,7 +34,7 @@ spring:
             # http://patient-service:4000/patients
             # ==========================================
             - id: patient-service-route
-              uri: http://host.docker.internal:4000
+              uri: http://patient-service:4000
               predicates:
                 - Path=/api/patients,/api/patients/**
               filters:
@@ -51,14 +51,14 @@ spring:
             # http://patient-service:4000/v3/api-docs
             # ==========================================
             - id: api-docs-patient-route
-              uri: http://host.docker.internal:4000
+              uri: http://patient-service:4000
               predicates:
                 - Path=/api-docs/patients
               filters:
                 - RewritePath=/api-docs/patients,/v3/api-docs
 
             - id: api-docs-auth-route
-              uri: http://host.docker.internal:4005
+              uri: http://auth-service:4005
               predicates:
                 - Path=/api-docs/auth
               filters:

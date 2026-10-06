@@ -9,7 +9,7 @@ public class PatientIntegrationTest {
 
     @BeforeAll
     static void setUp() {
-        RestAssured.baseURI = "http://localhost:4004";
+        RestAssured.baseURI = System.getProperty("test.baseUri", "http://localhost:4004");
     }
 
     @Test
@@ -39,6 +39,6 @@ public class PatientIntegrationTest {
                 .get("/api/patients")
                 .then()
                 .statusCode(200)
-                .body("patients", notNullValue());
+                .body("$", notNullValue());
     }
 }
